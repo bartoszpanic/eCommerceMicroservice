@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A2D0BD27-B61
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "src\Shared\Shared.csproj", "{F072215D-5F33-49D2-8E43-EA5F3D0995CF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProductAPI", "src\ProductAPI\ProductAPI.csproj", "{48FA4065-23C9-445E-8E0B-C9A328D8B058}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +22,13 @@ Global
 		{F072215D-5F33-49D2-8E43-EA5F3D0995CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F072215D-5F33-49D2-8E43-EA5F3D0995CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F072215D-5F33-49D2-8E43-EA5F3D0995CF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48FA4065-23C9-445E-8E0B-C9A328D8B058}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48FA4065-23C9-445E-8E0B-C9A328D8B058}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48FA4065-23C9-445E-8E0B-C9A328D8B058}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48FA4065-23C9-445E-8E0B-C9A328D8B058}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F072215D-5F33-49D2-8E43-EA5F3D0995CF} = {A2D0BD27-B61E-4A2D-BE3F-73C0108F12BC}
+		{48FA4065-23C9-445E-8E0B-C9A328D8B058} = {A2D0BD27-B61E-4A2D-BE3F-73C0108F12BC}
 	EndGlobalSection
 EndGlobal
