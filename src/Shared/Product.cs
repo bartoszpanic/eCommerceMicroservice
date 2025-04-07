@@ -7,7 +7,7 @@ public record Product
 {
     [BsonId]
     [BsonElement("_id"), BsonRepresentation(BsonType.ObjectId)]
-    public Guid Id { get; init; } = Guid.NewGuid();
+    public string Id { get; init; }
 
     [BsonElement("product_name")]
     public string ProductName { get; set; } = string.Empty;
