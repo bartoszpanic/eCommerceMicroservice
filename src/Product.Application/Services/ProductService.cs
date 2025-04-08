@@ -1,4 +1,5 @@
-using System;
+using FluentResults;
+using Product.Application.Dtos;
 
 namespace Product.Application.Services;
 
@@ -10,8 +11,15 @@ public class ProductService : IProductService
         _productRepository = productRepository;
     }
 
+    public async Task<Result<string>> CreateProductAsync(ProductDto product)
+    {
+        return await _productRepository.CreateProductAsync(product);
+    }
+
     public async Task<List<Shared.Product>> GetProductsAsync()
     {
         return await _productRepository.GetProductsAsync();
     }
+
+
 }

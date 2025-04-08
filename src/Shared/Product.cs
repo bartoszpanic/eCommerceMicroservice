@@ -13,4 +13,8 @@ public record Product
     public string ProductName { get; set; } = string.Empty;
     [BsonElement("product_price")]
     public decimal Price { get; set; }
+    [BsonElement("isDeleted")]
+    public bool isDeleted { get; set; }
+    [BsonElement("created_at")]
+    public DateTimeOffset CreatedAt { get; init; }
 }

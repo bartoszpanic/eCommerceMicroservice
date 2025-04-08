@@ -1,6 +1,8 @@
 using Product.Infrastructure;
 using Product.Application;
 using Product.Application.Services;
+using Product.Application.Dtos;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProductInfrastructure(builder.Configuration);
@@ -30,26 +32,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-// app.MapGet("/weatherforecast", () =>
-// {
-//     var forecast = Enumerable.Range(1, 5).Select(index =>
-//         new WeatherForecast
-//         (
-//             DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-//             Random.Shared.Next(-20, 55),
-//             summaries[Random.Shared.Next(summaries.Length)]
-//         ))
-//         .ToArray();
-//     return forecast;
-// })
-// .WithName("GetWeatherForecast")
-// .WithOpenApi();
-
 app.MapGet("/products", async (IProductService service) =>
 {
     return await service.GetProductsAsync();
@@ -57,9 +39,13 @@ app.MapGet("/products", async (IProductService service) =>
 .WithName("GetProducts")
 .WithOpenApi();
 
+app.MapPost("/product", async (IProductService service, [FromBody] ProductDto product) =>
+{
+    var result = await service.CreateProductAsync(product);
+    return Results.Created($"product/{result}", result);
+})
+.WithName("CreateProduct")
+.WithOpenApi();
+
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
