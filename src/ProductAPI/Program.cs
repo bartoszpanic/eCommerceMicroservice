@@ -3,10 +3,14 @@ using Product.Application;
 using Product.Application.Services;
 using Product.Application.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProductInfrastructure(builder.Configuration);
 builder.Services.AddProductApplication();
+builder.Logging.ClearProviders();
+builder.Logging.SetMinimumLevel(LogLevel.Trace);
+builder.Host.UseNLog();
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -3,14 +3,16 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using Product.Application;
 using Product.Application.Dtos;
+using Product.Application.Logger;
 
 namespace Product.Infrastructure;
 
 public class ProductRepository : IProductRepository
 {
     private readonly IMongoCollection<Shared.Product> _products;
+    private readonly ILoggerService<ProductRepository> _loggerService;
 
-    public ProductRepository(MongoDbService mongoDbService)
+    public ProductRepository(MongoDbService mongoDbService, ILoggerService<ProductRepository> loggerService)
     {
         if (mongoDbService.Database == null)
         {
@@ -19,6 +21,7 @@ public class ProductRepository : IProductRepository
 
         _products = mongoDbService.Database.GetCollection<Shared.Product>("products")
                    ?? throw new ArgumentNullException(nameof(_products), "Products collection cannot be null.");
+        _loggerService = loggerService;
     }
 
     public async Task<Result<string>> CreateProductAsync(ProductDto product)
@@ -36,10 +39,14 @@ public class ProductRepository : IProductRepository
 
             _products.InsertOne(newProduct);
             var id = await Task.FromResult(newProduct.Id.ToString());
+            _loggerService.LogInfo($"Product created with ID: {id}");
             return Result.Ok(id);
+
         }
         catch (Exception ex)
         {
+            var message = $"An error occurred while creating the product. {ex.Message}";
+            _loggerService.LogError(message, ex);
             return Result.Fail(new Error("An error occurred while creating the product.").CausedBy(ex));
         }
     }
@@ -50,7 +57,9 @@ public class ProductRepository : IProductRepository
         {
             if (!ObjectId.TryParse(id, out ObjectId objectId))
             {
-                return Result.Fail(new Error("Invalid product id."));
+                var message = $"Invalid product ID format: {id}";
+                _loggerService.LogError(message);
+                return Result.Fail(new Error(message));
             }
 
             var filter = Builders<Shared.Product>.Filter.Eq(p => p.Id, objectId.ToString());
@@ -58,14 +67,18 @@ public class ProductRepository : IProductRepository
 
             if (product == null)
             {
-                return Result.Fail(new Error("Product not found."));
+                var message = $"Product with ID {id} not found.";
+                _loggerService.LogError(message);
+                return Result.Fail(new Error(message));
             }
 
             return Result.Ok(product);
         }
         catch (Exception ex)
         {
-            return Result.Fail(new Error("An error occurred while retrieving the product.").CausedBy(ex));
+            var message = $"An error occurred while retrieving the product with ID {id}. {ex.Message}";
+            _loggerService.LogError(message, ex);
+            return Result.Fail(new Error(message).CausedBy(ex));
         }
     }
 
@@ -93,15 +106,18 @@ public class ProductRepository : IProductRepository
 
             if (result.ModifiedCount == 0)
             {
-                return Result.Fail(new Error("Product not found or already deleted."));
+                var message = $"Product with ID {id} not found or already deleted.";
+                _loggerService.LogError(message);
+                return Result.Fail(new Error(message));
             }
 
             return Result.Ok();
         }
         catch (Exception ex)
         {
+            var message = $"An error occurred while soft deleting the product with ID {id}. {ex.Message}";
+            _loggerService.LogError(message, ex);
             return Result.Fail(new Error("An error occurred while soft deleting the product.").CausedBy(ex));
-            throw;
         }
     }
 

@@ -8,6 +8,7 @@ public static class ProductApplicationDependencyInjection
     public static IServiceCollection AddProductApplication(this IServiceCollection services)
     {
         services.AddScoped<IProductService, ProductService>();
+        
 
         return services;
     }
