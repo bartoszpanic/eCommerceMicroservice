@@ -1,4 +1,5 @@
 using FluentResults;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Product.Application;
 using Product.Application.Dtos;
@@ -40,6 +41,31 @@ public class ProductRepository : IProductRepository
         catch (Exception ex)
         {
             return Result.Fail(new Error("An error occurred while creating the product.").CausedBy(ex));
+        }
+    }
+
+    public async Task<Result<Shared.Product>> GetProductByIdAsync(string id)
+    {
+        try
+        {
+            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            {
+                return Result.Fail(new Error("Invalid product id."));
+            }
+
+            var filter = Builders<Shared.Product>.Filter.Eq(p => p.Id, objectId.ToString());
+            var product = await _products.Find(filter).FirstOrDefaultAsync();
+
+            if (product == null)
+            {
+                return Result.Fail(new Error("Product not found."));
+            }
+
+            return Result.Ok(product);
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(new Error("An error occurred while retrieving the product.").CausedBy(ex));
         }
     }
 

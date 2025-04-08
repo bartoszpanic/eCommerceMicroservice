@@ -55,5 +55,13 @@ app.MapDelete("/product/{id}", async (IProductService service, string id) =>
 .WithName("DeleteProduct")
 .WithOpenApi();
 
+app.MapGet("/product/{id}", async (IProductService service, string id) =>
+{
+    var result = await service.GetProductByIdAsync(id);
+    return result.IsSuccess ? Results.Ok(result.Value) : Results.NotFound(result.Errors.FirstOrDefault()?.Message);
+})
+.WithName("GetProductById")
+.WithOpenApi();
+
 app.Run();
 
