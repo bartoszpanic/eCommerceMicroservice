@@ -29,7 +29,8 @@ public class ProductRepository : IProductRepository
                 ProductName = product.ProductName,
                 Price = product.Price,
                 CreatedAt = DateTimeOffset.UtcNow,
-                isDeleted = false
+                isDeleted = false,
+                Description = product.Description
             };
 
             _products.InsertOne(newProduct);
@@ -55,4 +56,27 @@ public class ProductRepository : IProductRepository
             throw new ApplicationException("An error occurred while retrieving products.", ex);
         }
     }
+
+    public async Task<Result> SoftDeleteProductAsync(string id)
+    {
+        try
+        {
+            var filter = Builders<Shared.Product>.Filter.Eq(p => p.Id, id);
+            var update = Builders<Shared.Product>.Update.Set(p => p.isDeleted, true);
+            var result = await _products.UpdateOneAsync(filter, update);
+
+            if (result.ModifiedCount == 0)
+            {
+                return Result.Fail(new Error("Product not found or already deleted."));
+            }
+
+            return Result.Ok();
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(new Error("An error occurred while soft deleting the product.").CausedBy(ex));
+            throw;
+        }
+    }
+
 }

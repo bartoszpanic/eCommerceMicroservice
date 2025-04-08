@@ -47,5 +47,13 @@ app.MapPost("/product", async (IProductService service, [FromBody] ProductDto pr
 .WithName("CreateProduct")
 .WithOpenApi();
 
+app.MapDelete("/product/{id}", async (IProductService service, string id) =>
+{
+    var result = await service.SoftDeleteProductAsync(id);
+    return result.IsSuccess ? Results.NoContent() : Results.NotFound(result.Errors.FirstOrDefault()?.Message);
+})
+.WithName("DeleteProduct")
+.WithOpenApi();
+
 app.Run();
 

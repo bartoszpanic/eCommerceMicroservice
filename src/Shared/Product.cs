@@ -17,4 +17,5 @@ public record Product
     public bool isDeleted { get; set; }
     [BsonElement("created_at")]
     public DateTimeOffset CreatedAt { get; init; }
+    public string Description { get; set; } = string.Empty;
 }

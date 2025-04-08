@@ -21,5 +21,8 @@ public class ProductService : IProductService
         return await _productRepository.GetProductsAsync();
     }
 
-
+    public async Task<Result> SoftDeleteProductAsync(string id)
+    {
+        return await _productRepository.SoftDeleteProductAsync(id);
+    }
 }
