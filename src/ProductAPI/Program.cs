@@ -1,9 +1,29 @@
-var builder = WebApplication.CreateBuilder(args);
+using Product.Infrastructure;
+using Product.Application;
+using Product.Application.Services;
+using Product.Application.Dtos;
+using Microsoft.AspNetCore.Mvc;
+using NLog.Web;
 
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddProductInfrastructure(builder.Configuration);
+builder.Services.AddProductApplication();
+builder.Logging.ClearProviders();
+builder.Logging.SetMinimumLevel(LogLevel.Trace);
+builder.Host.UseNLog();
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Product API",
+        Version = "v1",
+        Description = "API for managing products in the eCommerce microservice."
+    });
+});
+
 
 var app = builder.Build();
 
@@ -16,29 +36,36 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
+app.MapGet("/products", async (IProductService service) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    return await service.GetProductsAsync();
 })
-.WithName("GetWeatherForecast")
+.WithName("GetProducts")
+.WithOpenApi();
+
+app.MapPost("/product", async (IProductService service, [FromBody] ProductDto product) =>
+{
+    var result = await service.CreateProductAsync(product);
+    return Results.Created($"product/{result}", result);
+})
+.WithName("CreateProduct")
+.WithOpenApi();
+
+app.MapDelete("/product/{id}", async (IProductService service, string id) =>
+{
+    var result = await service.SoftDeleteProductAsync(id);
+    return result.IsSuccess ? Results.NoContent() : Results.NotFound(result.Errors.FirstOrDefault()?.Message);
+})
+.WithName("DeleteProduct")
+.WithOpenApi();
+
+app.MapGet("/product/{id}", async (IProductService service, string id) =>
+{
+    var result = await service.GetProductByIdAsync(id);
+    return result.IsSuccess ? Results.Ok(result.Value) : Results.NotFound(result.Errors.FirstOrDefault()?.Message);
+})
+.WithName("GetProductById")
 .WithOpenApi();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
